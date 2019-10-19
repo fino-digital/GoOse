@@ -18,17 +18,29 @@ func New(args ...string) Goose {
 
 // ExtractFromURL follows the URL, fetches the HTML page and returns an article object
 func (g Goose) ExtractFromURL(url string) (*Article, error) {
+	const errMessage = "could not extract from url"
 	HtmlRequester := NewHtmlRequester(g.config)
 	html, err := HtmlRequester.fetchHTML(url)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get htnk from site")
 	}
 	cc := NewCrawler(g.config)
-	return cc.Crawl(html, url)
+	article, err := cc.Crawl(html, url)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+
+	return article, nil
 }
 
 // ExtractFromRawHTML returns an article object from the raw HTML content
 func (g Goose) ExtractFromRawHTML(RawHTML string, url string) (*Article, error) {
+	const errMessage = "could not extract from rawHTML"
 	cc := NewCrawler(g.config)
-	return cc.Crawl(RawHTML, url)
+	article, err := cc.Crawl(RawHTML, url)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+
+	return article, nil
 }
