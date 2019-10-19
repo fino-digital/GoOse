@@ -1,11 +1,11 @@
 package goose
 
 import (
-	"errors"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/pkg/errors"
 )
 
 // Crawler can fetch the target HTML page
@@ -76,6 +76,7 @@ func (c Crawler) GetCharset(document *goquery.Document) string {
 // Preprocess fetches the HTML page if needed, converts it to UTF-8 and applies
 // some text normalisation to guarantee better results when extracting the content
 func (c *Crawler) Preprocess(RawHTML string) (*goquery.Document, error) {
+	const errMessage = "could not preprocess rawHTML"
 	var err error
 
 	if RawHTML == "" {
@@ -87,7 +88,7 @@ func (c *Crawler) Preprocess(RawHTML string) (*goquery.Document, error) {
 	reader := strings.NewReader(RawHTML)
 	document, err := goquery.NewDocumentFromReader(reader)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, errMessage)
 	}
 
 	cs := c.GetCharset(document)
@@ -97,7 +98,7 @@ func (c *Crawler) Preprocess(RawHTML string) (*goquery.Document, error) {
 		RawHTML = UTF8encode(RawHTML, cs)
 		reader = strings.NewReader(RawHTML)
 		if document, err = goquery.NewDocumentFromReader(reader); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, errMessage)
 		}
 	}
 
@@ -106,11 +107,12 @@ func (c *Crawler) Preprocess(RawHTML string) (*goquery.Document, error) {
 
 // Crawl fetches the HTML body and returns an Article
 func (c Crawler) Crawl(RawHTML string, url string) (*Article, error) {
+	const errMessage = "could not crawl rawHTML from url"
 	article := new(Article)
 
 	document, err := c.Preprocess(RawHTML)
 	if nil != err {
-		return nil, err
+		return nil, errors.Wrap(err, errMessage)
 	}
 	if nil == document {
 		return article, nil
@@ -120,7 +122,7 @@ func (c Crawler) Crawl(RawHTML string, url string) (*Article, error) {
 
 	article.RawHTML, err = document.Html()
 	if nil != err {
-		return nil, err
+		return nil, errors.Wrap(err, errMessage)
 	}
 	article.FinalURL = url
 	article.Doc = document
