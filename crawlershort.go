@@ -69,6 +69,7 @@ func (c CrawlerShort) GetCharset(document *goquery.Document) string {
 // some text normalisation to guarantee better results when extracting the content
 func (c *CrawlerShort) Preprocess(RawHTML string) (*goquery.Document, error) {
 	var err error
+	const errMessage = "could not preprocess rawHTML"
 
 	RawHTML = c.addSpacesBetweenTags(RawHTML)
 
